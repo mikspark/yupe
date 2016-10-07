@@ -227,13 +227,23 @@ class CategoryBackendController extends yupe\components\controllers\BackControll
      *
      * @return void
      */
-    public function actionIndex()
+    public function actionIndex($forModule = null)
     {
         $model = new Category('search');
         $model->unsetAttributes(); // clear any default values
 
         if (isset($_GET['Category'])) {
             $model->attributes = $_GET['Category'];
+        }
+
+        if (null !== $forModule) {
+            /* @var $module \yupe\components\WebModule */
+            $module = Yii::app()->getModule($forModule);
+            if (null !== $module &&
+                ($module->canGetProperty('mainCategory') || property_exists($module, 'mainCategory'))
+            ) {
+                $model->parent_id = $module->mainCategory;
+            }
         }
 
         $this->render('index', ['model' => $model]);
